@@ -1,0 +1,117 @@
+.llama-asker {
+
+    &__form {
+        margin-bottom: 20px;
+    }
+
+    &__label {
+        display: block;
+        font-weight: bold;
+        text-align: center;
+        padding-top: 2rem;
+        padding-bottom: 1rem;
+    }
+
+    &__textarea-div {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__textarea {
+        width: 60%;
+        resize: none;
+        padding: 8px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+        margin-bottom: 1rem;
+        border-radius: 1rem;
+        background-color: white;
+    }
+
+    &__button-div {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__button {
+        padding: 10px 15px;
+        cursor: pointer;
+        border: none;
+        background-color: red;
+        color: white;
+        border-radius: 1.5rem;
+
+
+        &:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+    }
+
+    &__loading {
+        font-style: italic;
+        color: #555;
+        text-align: center;
+    }
+
+    &__error-message {
+        &--general {
+            color: red;
+            font-weight: bold;
+            border: 1px dashed red;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #ffeeee;
+        }
+
+        &--response {
+            color: orange;
+            font-style: italic;
+        }
+    }
+
+    &__response-containers {
+        display: flex;
+        flex-direction: row;
+    }
+
+    &__response-container {
+        width: 50%;
+        padding: 10px;
+    }
+
+    &__response-heading {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 1.1em;
+        color: #333;
+    }
+
+    &__response-text1 {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background: #ffb2b2;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.95em;
+        line-height: 1.4;
+    }
+
+    &__response-text2 {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background: #e5e5ff;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.95em;
+        line-height: 1.4;
+    }
+
+    &__no-response {
+        color: #777;
+        font-style: italic;
+        text-align: center;
+    }
+}
