@@ -1,12 +1,13 @@
 import './App.scss'
+import Input from './components/Input/Input'
+import Header from './components/Header/Header'
 
 function App() {
 
-
   return (
     <>
-      <h1>Ventr</h1>
-      <h2>Vent your frustrations and complaints to an indifferent AI</h2>
+      <Header />
+      <Input />
     </>
   )
 }
