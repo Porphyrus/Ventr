@@ -1,7 +1,9 @@
-import './Input.scss'
-import axios from 'axios'
-import { useState, useCallback } from 'react'
+import './Input.scss';
+import axios from 'axios';
+import { useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
+const HISTORY_STORAGE_KEY = 'llamaPromptHistory';
 const BACKEND_API_URL = 'http://localhost:8080/api/ask-llama';
 
 function SecureLlamaAskerMulti() {
@@ -17,6 +19,44 @@ function SecureLlamaAskerMulti() {
     const [error3, setError3] = useState(null);
     const [error4, setError4] = useState(null);
 
+    const savePromptToHistory = useCallback((submittedPrompt, responseData) => {
+        try {
+            const storedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+            let currentHistory = [];
+            if (storedHistory) {
+                try {
+                    const parsed = JSON.parse(storedHistory);
+                    if (Array.isArray(parsed)) {
+                        currentHistory = parsed;
+                    } else {
+                        console.warn("Invalid history found in localStorage, resetting.");
+                        localStorage.removeItem(HISTORY_STORAGE_KEY);
+                    }
+                } catch (parseError) {
+                    console.error("Failed to parse history from localStorage, resetting.", parseError);
+                    localStorage.removeItem(HISTORY_STORAGE_KEY);
+                }
+            }
+
+            const newEntry = {
+                prompt: submittedPrompt,
+                timestamp: Date.now(),
+                responses: { // Store responses in a nested object
+                    negative: { answer: responseData.answer1 || null, error: responseData.error1 || null },
+                    positive: { answer: responseData.answer2 || null, error: responseData.error2 || null },
+                    philosophical: { answer: responseData.answer3 || null, error: responseData.error3 || null },
+                    joke: { answer: responseData.answer4 || null, error: responseData.error4 || null }
+                }
+            };
+
+            const updatedHistory = [...currentHistory, newEntry];
+            localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updatedHistory));
+
+        } catch (storageError) {
+            console.error("Failed to save prompt to localStorage:", storageError);
+        }
+    }, []);
+
     const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
         setIsLoading(true);
@@ -30,22 +70,21 @@ function SecureLlamaAskerMulti() {
         setResponse3('');
         setResponse4('');
 
+        const submittedPrompt = prompt;
+
         try {
             const res = await axios.post(BACKEND_API_URL, {
-                prompt: prompt
+                prompt: submittedPrompt
             });
 
             const { answer1, error1, answer2, error2, answer3, error3, answer4, error4 } = res.data;
 
             setResponse1(answer1 || '');
             setError1(error1);
-
             setResponse2(answer2 || '');
             setError2(error2);
-
             setResponse3(answer3 || '');
             setError3(error3);
-
             setResponse4(answer4 || '');
             setError4(error4);
 
@@ -55,6 +94,9 @@ function SecureLlamaAskerMulti() {
             } else if (errorsExist.length > 0) {
                 setError(`One or more AI requests failed (${errorsExist.length} total). See details below.`);
             }
+
+            // *** MODIFIED: Pass response data to save function ***
+            savePromptToHistory(submittedPrompt, { answer1, error1, answer2, error2, answer3, error3, answer4, error4 });
 
         } catch (err) {
             console.error("Error fetching from backend:", err);
@@ -68,7 +110,7 @@ function SecureLlamaAskerMulti() {
         } finally {
             setIsLoading(false);
         }
-    }, [prompt]);
+    }, [prompt, savePromptToHistory]); // Keep dependencies
 
     return (
         <div className="llama-asker">
@@ -86,7 +128,7 @@ function SecureLlamaAskerMulti() {
                     />
                 </div>
                 <div className='llama-asker__button-div'>
-                    <button type="submit" className="llama-asker__button" disabled={isLoading}>
+                    <button type="submit" className="llama-asker__button" disabled={isLoading || !prompt.trim()} >
                         {isLoading ? 'Letting off steam...' : 'Vent'}
                     </button>
                 </div>
@@ -97,6 +139,7 @@ function SecureLlamaAskerMulti() {
             {error && <p className="llama-asker__error-message llama-asker__error-message--general">{error}</p>}
 
             <div className="llama-asker__response-containers">
+
                 <div className="llama-asker__response-container">
                     <h3 className="llama-asker__response-heading">Negative:</h3>
                     {error1 && <p className="llama-asker__error-message llama-asker__error-message--response">{error1}</p>}
@@ -105,7 +148,7 @@ function SecureLlamaAskerMulti() {
                             {response1}
                         </pre>
                     )}
-                    {!isLoading && !response1 && !error1 && <p className="llama-asker__no-response">No response generated.</p>}
+                    {!isLoading && !response1 && !error1 && !error && <p className="llama-asker__no-response">...</p>}
                 </div>
 
                 <div className="llama-asker__response-container">
@@ -116,34 +159,41 @@ function SecureLlamaAskerMulti() {
                             {response2}
                         </pre>
                     )}
-                    {!isLoading && !response2 && !error2 && <p className="llama-asker__no-response">No response generated.</p>}
+                    {!isLoading && !response2 && !error2 && !error && <p className="llama-asker__no-response">...</p>}
                 </div>
             </div>
-
             <div className="llama-asker__response-containers">
+
                 <div className="llama-asker__response-container">
-                    <h3 className="llama-asker__response-heading">Philosophical Quote:</h3>
+                    <h3 className="llama-asker__response-heading">Philosophical:</h3>
                     {error3 && <p className="llama-asker__error-message llama-asker__error-message--response">{error3}</p>}
                     {response3 && (
-                        <pre className="llama-asker__response-text llama-asker__response-text3">
+                        <pre className="llama-asker__response-text3">
                             {response3}
                         </pre>
                     )}
-                    {!isLoading && !response3 && !error3 && <p className="llama-asker__no-response">No response generated.</p>}
+                    {!isLoading && !response3 && !error3 && !error && <p className="llama-asker__no-response">...</p>}
                 </div>
 
                 <div className="llama-asker__response-container">
                     <h3 className="llama-asker__response-heading">Joke:</h3>
                     {error4 && <p className="llama-asker__error-message llama-asker__error-message--response">{error4}</p>}
                     {response4 && (
-                        <pre className="llama-asker__response-text llama-asker__response-text4">
+                        <pre className="llama-asker__response-text4">
                             {response4}
                         </pre>
                     )}
-                    {!isLoading && !response4 && !error4 && <p className="llama-asker__no-response">No response generated.</p>}
+                    {!isLoading && !response4 && !error4 && !error && <p className="llama-asker__no-response">...</p>}
                 </div>
             </div>
 
+            <div className="llama-asker__history-link-container">
+                <Link to="/history">
+                    <button className="llama-asker__history-button">
+                        View Venting History
+                    </button>
+                </Link>
+            </div>
         </div>
     );
 }
