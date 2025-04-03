@@ -109,6 +109,28 @@
         line-height: 1.4;
     }
 
+    &__response-text3 {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background: #C1E1C1;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.95em;
+        line-height: 1.4;
+    }
+
+    &__response-text4 {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        background: #FFFAA0;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.95em;
+        line-height: 1.4;
+    }
+
     &__no-response {
         color: #777;
         font-style: italic;

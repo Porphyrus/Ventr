@@ -8,10 +8,14 @@ function SecureLlamaAskerMulti() {
     const [prompt, setPrompt] = useState('It feels like the world is burning down around me.');
     const [response1, setResponse1] = useState('');
     const [response2, setResponse2] = useState('');
+    const [response3, setResponse3] = useState('');
+    const [response4, setResponse4] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null); // General request error
-    const [error1, setError1] = useState(null); // Error for response 1
-    const [error2, setError2] = useState(null); // Error for response 2
+    const [error, setError] = useState(null);
+    const [error1, setError1] = useState(null);
+    const [error2, setError2] = useState(null);
+    const [error3, setError3] = useState(null);
+    const [error4, setError4] = useState(null);
 
     const handleSubmit = useCallback(async (event) => {
         event.preventDefault();
@@ -19,15 +23,19 @@ function SecureLlamaAskerMulti() {
         setError(null);
         setError1(null);
         setError2(null);
+        setError3(null);
+        setError4(null);
         setResponse1('');
         setResponse2('');
+        setResponse3('');
+        setResponse4('');
 
         try {
             const res = await axios.post(BACKEND_API_URL, {
                 prompt: prompt
             });
 
-            const { answer1, error1, answer2, error2 } = res.data;
+            const { answer1, error1, answer2, error2, answer3, error3, answer4, error4 } = res.data;
 
             setResponse1(answer1 || '');
             setError1(error1);
@@ -35,10 +43,17 @@ function SecureLlamaAskerMulti() {
             setResponse2(answer2 || '');
             setError2(error2);
 
-            if (error1 && error2) {
-                setError("Both AI requests failed. See details below.");
-            } else if (error1 || error2) {
-                setError("One of the AI requests failed. See details below.");
+            setResponse3(answer3 || '');
+            setError3(error3);
+
+            setResponse4(answer4 || '');
+            setError4(error4);
+
+            const errorsExist = [error1, error2, error3, error4].filter(Boolean);
+            if (errorsExist.length === 4) {
+                setError("All AI requests failed. See details below.");
+            } else if (errorsExist.length > 0) {
+                setError(`One or more AI requests failed (${errorsExist.length} total). See details below.`);
             }
 
         } catch (err) {
@@ -77,7 +92,7 @@ function SecureLlamaAskerMulti() {
                 </div>
             </form>
 
-            {isLoading && <p className="llama-asker__loading">Loading...</p>}
+            {isLoading && <p className="llama-asker__loading">Venting...</p>}
 
             {error && <p className="llama-asker__error-message llama-asker__error-message--general">{error}</p>}
 
@@ -102,6 +117,30 @@ function SecureLlamaAskerMulti() {
                         </pre>
                     )}
                     {!isLoading && !response2 && !error2 && <p className="llama-asker__no-response">No response generated.</p>}
+                </div>
+            </div>
+
+            <div className="llama-asker__response-containers">
+                <div className="llama-asker__response-container">
+                    <h3 className="llama-asker__response-heading">Philosophical Quote:</h3>
+                    {error3 && <p className="llama-asker__error-message llama-asker__error-message--response">{error3}</p>}
+                    {response3 && (
+                        <pre className="llama-asker__response-text llama-asker__response-text3">
+                            {response3}
+                        </pre>
+                    )}
+                    {!isLoading && !response3 && !error3 && <p className="llama-asker__no-response">No response generated.</p>}
+                </div>
+
+                <div className="llama-asker__response-container">
+                    <h3 className="llama-asker__response-heading">Joke:</h3>
+                    {error4 && <p className="llama-asker__error-message llama-asker__error-message--response">{error4}</p>}
+                    {response4 && (
+                        <pre className="llama-asker__response-text llama-asker__response-text4">
+                            {response4}
+                        </pre>
+                    )}
+                    {!isLoading && !response4 && !error4 && <p className="llama-asker__no-response">No response generated.</p>}
                 </div>
             </div>
 
